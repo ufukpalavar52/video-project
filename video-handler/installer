@@ -1,0 +1,1 @@
+go install github.com/kkdai/youtube/v2/cmd/youtubedr@latest
