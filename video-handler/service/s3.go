@@ -77,6 +77,7 @@ func (s3Service *S3Service) PutFile(filePath string, body []byte, expires ...*ti
 
 	if len(expires) > 0 && expires[0] != nil {
 		s3Opt.Expires = expires[0]
+		log.Println("Set Expiration:", s3Opt.Expires.Format(time.RFC3339))
 	}
 
 	_, err = s3Service.Client.PutObject(s3Service.ctx, s3Opt)

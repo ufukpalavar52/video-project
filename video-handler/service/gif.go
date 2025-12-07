@@ -15,6 +15,7 @@ const MB = 1024 * 1024
 const Video240Scale = 240
 const Video360Scale = 360
 const Video480Scale = 480
+const GifFps = 15
 
 type GifService struct {
 	gif     *model.GifVideo
@@ -81,9 +82,10 @@ func (g *GifService) FfmpegProcess(filePath string) (string, error) {
 	giffName := util.UUID() + ".gif"
 	outputGif := os.Getenv("TMP_VIDEO_PATH") + "/" + giffName
 	videoScale := fmt.Sprintf("%d", g.GetVideoScale(filePath))
+	gifFps := fmt.Sprintf("%d", GifFps)
 	args := []string{
 		"-i", inputFile,
-		"-filter_complex", "[0:v] fps=15,scale=" + videoScale + ":-1:flags=lanczos[x];[x]split[y][z];[y]palettegen[p];[z][p]paletteuse",
+		"-filter_complex", "[0:v] fps=" + gifFps + ",scale=" + videoScale + ":-1:flags=lanczos[x];[x]split[y][z];[y]palettegen[p];[z][p]paletteuse",
 		"-loop", "0",
 		outputGif,
 	}

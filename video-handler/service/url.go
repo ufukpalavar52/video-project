@@ -23,7 +23,7 @@ func (u *UrlService) GetFile(fullUrl string) ([]byte, error) {
 }
 
 func (u *UrlService) PutFile(fullPath string, data []byte, expires ...*time.Time) error {
-	return u.storage.PutFile(fullPath, data)
+	return u.storage.PutFile(fullPath, data, expires...)
 }
 
 func (u *UrlService) DownloadVideo(fullUrl string) ([]byte, error) {
