@@ -92,7 +92,7 @@ services:
     networks:
       - backend
   video-kafka:
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:7.8.2
     hostname: kafka
     container_name: video-kafka
     depends_on:
