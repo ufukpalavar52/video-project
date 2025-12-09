@@ -12,7 +12,8 @@ FROM debian:stable-slim as runner
 
 
 COPY --from=builder /app/youtubedr /usr/local/bin
-COPY --from=builder /app/.env /app/run ./
+COPY --from=builder /app/.env /app/.env
+COPY --from=builder /app/run /app/run
 
 RUN mkdir /app/tmp-video-file && apt-get update -y && apt-get install -y --no-install-recommends ca-certificates \
     && apt-get install -y --no-install-recommends \
