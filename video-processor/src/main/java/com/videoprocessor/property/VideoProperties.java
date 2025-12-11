@@ -15,7 +15,4 @@ public class VideoProperties {
 
     @Value("${video.gif.in-progress.timeout:30}")
     private Integer inProgressTimeout;
-
-    @Value("${video.gif.timeout-days:7}")
-    private Integer gifVideoTimeoutDays;
 }

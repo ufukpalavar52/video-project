@@ -5,9 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.videoprocessor.constant.GifVideoStatus;
 import com.videoprocessor.model.dto.GifVideoError;
 import com.videoprocessor.model.entity.GifVideo;
-import com.videoprocessor.model.entity.GifVideoErrorLog;
-import com.videoprocessor.repository.GifVideoErrorLogRepository;
+import com.videoprocessor.model.entity.VideoErrorLog;
+import com.videoprocessor.repository.VideoErrorLogRepository;
 import com.videoprocessor.repository.GifVideoRepository;
+import com.videoprocessor.util.StrUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -20,7 +21,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class GifKafkaService {
     private final GifVideoRepository gifVideoRepository;
-    private final GifVideoErrorLogRepository errorLogRepository;
+    private final VideoErrorLogRepository errorLogRepository;
     private final ObjectMapper mapper;
     private final VideoSaveStorageFactory videoSaveStorageFactory;
 
@@ -48,9 +49,11 @@ public class GifKafkaService {
         gifVideo.setStatus(GifVideoStatus.ERROR.name());
         gifVideoRepository.save(gifVideo);
 
-        GifVideoErrorLog errorLog = new GifVideoErrorLog();
+        String truncatedMessage = StrUtils.truncateString(gifError.getMessage(), 5000);
+
+        VideoErrorLog errorLog = new VideoErrorLog();
         errorLog.setTransactionId(gifError.getTransactionId());
-        errorLog.setMessage(gifError.getMessage());
+        errorLog.setMessage(truncatedMessage);
         errorLogRepository.save(errorLog);
 
         Boolean isUrl = Optional.ofNullable(gifVideo.getIsUrl()).orElse(false);
