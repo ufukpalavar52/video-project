@@ -1,11 +1,13 @@
 package model
 
-type GifVideo struct {
+type Video struct {
 	ID            int64  `json:"id"`
 	TransactionID string `json:"transactionId"`
 	Path          string `json:"path"`
 	IsUrl         bool   `json:"isUrl"`
-	GifPath       string `json:"gifPath"`
+	OutputPath    string `json:"outputPath"`
+	ProcessType   string `json:"processType"`
+	Resolution    string `json:"resolution"`
 	PathType      string `json:"pathType"`
 	StartTime     int    `json:"startTime"`
 	EndTime       int    `json:"endTime"`
@@ -13,7 +15,7 @@ type GifVideo struct {
 	CreatedAt     string `json:"createdAt"`
 }
 
-type GifVideoErrorLog struct {
+type VideoErrorLog struct {
 	TransactionID string `json:"transactionId"`
 	Message       string `json:"message"`
 }

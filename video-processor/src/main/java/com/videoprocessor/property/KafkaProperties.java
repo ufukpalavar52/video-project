@@ -7,9 +7,9 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Configuration
 public class KafkaProperties {
-    @Value("${spring.kafka.gif-topic}")
-    private String gifTopic;
+    @Value("${spring.kafka.video-topic}")
+    private String videoTopic;
 
-    @Value("${spring.kafka.gif-finish-topic}")
-    private String gifFinishTopic;
+    @Value("${spring.kafka.video-finish-topic}")
+    private String videoFinishTopic;
 }

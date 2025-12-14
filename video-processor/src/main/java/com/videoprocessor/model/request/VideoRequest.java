@@ -11,7 +11,7 @@ import lombok.Data;
         greaterThanField = "endTime",
         message = "The start time cannot occur after the end time."
 )
-public class GifRequest {
+public class VideoRequest {
     private String path;
     private int startTime;
     private int endTime;

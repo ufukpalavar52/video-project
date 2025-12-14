@@ -14,16 +14,18 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-public class GifVideo implements Serializable {
+public class Video implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String transactionId;
     private String path;
-    private String GifPath;
+    private String outputPath;
     private Boolean isUrl;
     private String pathType;
+    private String processType;
     private String status;
+    private String resolution;
     private int startTime;
     private int endTime;
 

@@ -18,12 +18,12 @@ const Video480Scale = 480
 const GifFps = 15
 
 type GifService struct {
-	gif     *model.GifVideo
+	gif     *model.Video
 	storage Storage
 	expires *time.Time
 }
 
-func NewGifService(gif *model.GifVideo, expires ...*time.Time) *GifService {
+func NewGifService(gif *model.Video, expires ...*time.Time) *GifService {
 	gifService := &GifService{
 		gif:     gif,
 		storage: NewStorage(gif.PathType, gif.IsUrl),
@@ -67,7 +67,7 @@ func (g *GifService) GiffProcess() error {
 	fullPath := os.Getenv("GIF_OUTPUT_PATH") + "/" + gifName
 	err = g.storage.PutFile(fullPath, body, g.expires)
 
-	g.gif.GifPath = fullPath
+	g.gif.OutputPath = fullPath
 
 	return err
 }

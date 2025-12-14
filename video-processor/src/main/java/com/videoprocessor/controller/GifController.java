@@ -1,8 +1,8 @@
 package com.videoprocessor.controller;
 
-import com.videoprocessor.model.entity.GifVideo;
-import com.videoprocessor.model.request.GifRequest;
-import com.videoprocessor.model.request.GifUrlRequest;
+import com.videoprocessor.model.entity.Video;
+import com.videoprocessor.model.request.VideoRequest;
+import com.videoprocessor.model.request.VideoUrlRequest;
 import com.videoprocessor.service.GifVideoService;
 import com.videoprocessor.validator.video.VideoFile;
 import jakarta.validation.ConstraintViolation;
@@ -33,36 +33,36 @@ public class GifController {
 
 
     @GetMapping
-    public ResponseEntity<GifVideo> getGifVideo(@RequestParam("transactionId") @NotNull String transactionId) {
+    public ResponseEntity<Video> getGifVideo(@RequestParam("transactionId") @NotNull String transactionId) {
         return ResponseEntity.ok(gifVideoService.getVideoTransactionId(transactionId));
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<GifVideo> uploadVideo(@RequestPart("file") @VideoFile MultipartFile file,
-                                                @RequestParam("startTime") @NotNull Integer startTime,
-                                                @RequestParam("endTime") @NotNull Integer endTime) throws IOException {
+    public ResponseEntity<Video> uploadVideo(@RequestPart("file") @VideoFile MultipartFile file,
+                                             @RequestParam("startTime") @NotNull Integer startTime,
+                                             @RequestParam("endTime") @NotNull Integer endTime) throws IOException {
 
-        GifRequest gifRequest = GifRequest.builder().startTime(startTime).endTime(endTime).build();
-        validateRequest(gifRequest);
-        return ResponseEntity.ok(gifVideoService.save(gifRequest, file));
+        VideoRequest videoRequest = VideoRequest.builder().startTime(startTime).endTime(endTime).build();
+        validateRequest(videoRequest);
+        return ResponseEntity.ok(gifVideoService.save(videoRequest, file));
     }
 
     @PostMapping(value = "/url")
-    public ResponseEntity<GifVideo> uploadUrlVideo(@RequestBody @Valid GifUrlRequest request) throws IOException {
+    public ResponseEntity<Video> uploadUrlVideo(@RequestBody @Valid VideoUrlRequest request) throws IOException {
         return ResponseEntity.ok(gifVideoService.save(request));
     }
 
     @GetMapping("download/{transactionId}")
     public ResponseEntity<byte[]> download(@PathVariable String transactionId) throws IOException {
-        GifVideo gifVideo = gifVideoService.getVideoTransactionId(transactionId);
+        Video video = gifVideoService.getVideoTransactionId(transactionId);
         HttpHeaders headers = new HttpHeaders();
 
-        String fileName = Paths.get(gifVideo.getGifPath()).getFileName().toString();
+        String fileName = Paths.get(video.getOutputPath()).getFileName().toString();
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"");
 
         headers.add(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_GIF_VALUE);
 
-        byte[] fileContent = gifVideoService.getFile(gifVideo.getGifPath());
+        byte[] fileContent = gifVideoService.getFile(video.getOutputPath());
 
         headers.setContentLength(fileContent.length);
         return ResponseEntity.ok().headers(headers).body(fileContent);

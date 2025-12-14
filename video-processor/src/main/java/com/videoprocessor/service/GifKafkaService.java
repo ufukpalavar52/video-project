@@ -2,12 +2,12 @@ package com.videoprocessor.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.videoprocessor.constant.GifVideoStatus;
-import com.videoprocessor.model.dto.GifVideoError;
-import com.videoprocessor.model.entity.GifVideo;
+import com.videoprocessor.constant.VideoStatus;
+import com.videoprocessor.model.dto.VideoError;
+import com.videoprocessor.model.entity.Video;
 import com.videoprocessor.model.entity.VideoErrorLog;
 import com.videoprocessor.repository.VideoErrorLogRepository;
-import com.videoprocessor.repository.GifVideoRepository;
+import com.videoprocessor.repository.VideoRepository;
 import com.videoprocessor.util.StrUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,34 +20,34 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class GifKafkaService {
-    private final GifVideoRepository gifVideoRepository;
+    private final VideoRepository videoRepository;
     private final VideoErrorLogRepository errorLogRepository;
     private final ObjectMapper mapper;
     private final VideoSaveStorageFactory videoSaveStorageFactory;
 
-    @KafkaListener(topics = "${spring.kafka.gif-finish-topic}", groupId = "${spring.kafka.consumer.group-id}")
+    @KafkaListener(topics = "${spring.kafka.video-finish-topic}", groupId = "${spring.kafka.consumer.group-id}")
     public void consumeGifFinish(String message) throws JsonProcessingException {
-        GifVideo gifVideo = mapper.readValue(message, GifVideo.class);
-        gifVideo.setStatus(GifVideoStatus.SUCCESS.name());
-        gifVideoRepository.save(gifVideo);
-        log.info("Gif process finished {}", gifVideo);
-        Boolean isUrl = Optional.ofNullable(gifVideo.getIsUrl()).orElse(false);
+        Video video = mapper.readValue(message, Video.class);
+        video.setStatus(VideoStatus.SUCCESS.name());
+        videoRepository.save(video);
+        log.info("Gif process finished {}", video);
+        Boolean isUrl = Optional.ofNullable(video.getIsUrl()).orElse(false);
         if (isUrl) {
             return;
         }
-        deleteVideo(gifVideo.getPath(), gifVideo.getPathType());
+        deleteVideo(video.getPath(), video.getPathType());
     }
 
-    @KafkaListener(topics = "${spring.kafka.gif-error-topic}", groupId = "${spring.kafka.consumer.group-id}")
+    @KafkaListener(topics = "${spring.kafka.video-error-topic}", groupId = "${spring.kafka.consumer.group-id}")
     public void consumeGifError(String message) throws JsonProcessingException {
-        GifVideoError gifError = mapper.readValue(message, GifVideoError.class);
-        GifVideo gifVideo = gifVideoRepository.getByTransactionId(gifError.getTransactionId()).orElse(null);
-        if (gifVideo == null) {
+        VideoError gifError = mapper.readValue(message, VideoError.class);
+        Video video = videoRepository.getByTransactionId(gifError.getTransactionId()).orElse(null);
+        if (video == null) {
             log.warn("Gif process not found {}", gifError);
             return;
         }
-        gifVideo.setStatus(GifVideoStatus.ERROR.name());
-        gifVideoRepository.save(gifVideo);
+        video.setStatus(VideoStatus.ERROR.name());
+        videoRepository.save(video);
 
         String truncatedMessage = StrUtils.truncateString(gifError.getMessage(), 5000);
 
@@ -56,11 +56,11 @@ public class GifKafkaService {
         errorLog.setMessage(truncatedMessage);
         errorLogRepository.save(errorLog);
 
-        Boolean isUrl = Optional.ofNullable(gifVideo.getIsUrl()).orElse(false);
+        Boolean isUrl = Optional.ofNullable(video.getIsUrl()).orElse(false);
         if (isUrl) {
             return;
         }
-        deleteVideo(gifVideo.getPath(), gifVideo.getPathType());
+        deleteVideo(video.getPath(), video.getPathType());
     }
 
 

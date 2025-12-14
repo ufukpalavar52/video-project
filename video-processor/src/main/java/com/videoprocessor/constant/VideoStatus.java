@@ -2,13 +2,13 @@ package com.videoprocessor.constant;
 
 import java.util.Arrays;
 
-public enum GifVideoStatus {
+public enum VideoStatus {
     PENDING,
     IN_PROGRESS,
     SUCCESS,
     ERROR,;
 
-    public static GifVideoStatus fromValue(String status) {
+    public static VideoStatus fromValue(String status) {
         return Arrays.stream(values()).filter(v -> v.name().equalsIgnoreCase(status)).findFirst().orElse(null);
     }
 }

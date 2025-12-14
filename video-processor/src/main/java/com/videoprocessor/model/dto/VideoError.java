@@ -3,7 +3,7 @@ package com.videoprocessor.model.dto;
 import lombok.Data;
 
 @Data
-public class GifVideoError {
+public class VideoError {
     private String message;
     private String transactionId;
 }

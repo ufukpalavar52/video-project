@@ -2,14 +2,15 @@ package com.videoprocessor.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.videoprocessor.constant.ErrorCode;
-import com.videoprocessor.constant.GifVideoStatus;
+import com.videoprocessor.constant.VideoProcessType;
+import com.videoprocessor.constant.VideoStatus;
 import com.videoprocessor.exception.CommonException;
-import com.videoprocessor.model.entity.GifVideo;
-import com.videoprocessor.model.request.GifRequest;
-import com.videoprocessor.model.request.GifUrlRequest;
+import com.videoprocessor.model.entity.Video;
+import com.videoprocessor.model.request.VideoRequest;
+import com.videoprocessor.model.request.VideoUrlRequest;
 import com.videoprocessor.property.VideoProperties;
 import com.videoprocessor.property.KafkaProperties;
-import com.videoprocessor.repository.GifVideoRepository;
+import com.videoprocessor.repository.VideoRepository;
 import com.videoprocessor.util.FileNameUtils;
 import com.videoprocessor.util.StrUtils;
 import lombok.RequiredArgsConstructor;
@@ -29,32 +30,34 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class GifVideoService {
 
-    private final GifVideoRepository gifVideoRepository;
+    private final VideoRepository videoRepository;
     private final VideoProperties videoProperties;
     private final VideoSaveStorageFactory videoSaveStorageFactory;
     private final KafkaProducer kafkaProducer;
     private final KafkaProperties kafkaProperties;
 
-    public GifVideo save(GifRequest request, MultipartFile file) throws IOException {
+    public Video save(VideoRequest request, MultipartFile file) throws IOException {
         String path = saveFile(file);
-        GifVideo gifVideo = mapToEntity(request);
-        gifVideo.setPath(path);
-        gifVideo.setTransactionId(StrUtils.UUID());
-        GifVideo saveGif = gifVideoRepository.save(gifVideo);
-        kafkaProducer.sendMessage(kafkaProperties.getGifTopic(), gifVideo);
+        Video video = mapToEntity(request);
+        video.setPath(path);
+        video.setTransactionId(StrUtils.UUID());
+        video.setProcessType(VideoProcessType.GIF.name());
+        Video saveGif = videoRepository.save(video);
+        kafkaProducer.sendMessage(kafkaProperties.getVideoTopic(), video);
         return saveGif;
     }
 
-    public GifVideo save(GifUrlRequest request) throws IOException {
-        GifVideo gifVideo = mapToEntity(request);
-        gifVideo.setTransactionId(StrUtils.UUID());
-        GifVideo saveGif = gifVideoRepository.save(gifVideo);
-        kafkaProducer.sendMessage(kafkaProperties.getGifTopic(), gifVideo);
+    public Video save(VideoUrlRequest request) throws IOException {
+        Video video = mapToEntity(request);
+        video.setTransactionId(StrUtils.UUID());
+        video.setProcessType(VideoProcessType.GIF.name());
+        Video saveGif = videoRepository.save(video);
+        kafkaProducer.sendMessage(kafkaProperties.getVideoTopic(), video);
         return saveGif;
     }
 
-    public GifVideo getVideoTransactionId(String transactionId) {
-        return gifVideoRepository.getByTransactionId(transactionId)
+    public Video getVideoTransactionId(String transactionId) {
+        return videoRepository.getByTransactionId(transactionId)
                 .orElseThrow(() -> new CommonException(ErrorCode.TRANSACTION_NOT_FOUND));
     }
 
@@ -62,33 +65,33 @@ public class GifVideoService {
         return videoSaveStorageFactory.makeStorageService().getFile(fullPath);
     }
 
-    private GifVideo mapToEntity(GifRequest request) {
-        GifVideo gifVideo = new GifVideo();
-        gifVideo.setStartTime(request.getStartTime());
-        gifVideo.setEndTime(request.getEndTime());
-        gifVideo.setIsUrl(false);
-        gifVideo.setPathType(videoProperties.getPathType());
-        GifVideoStatus gifVideoStatus = GifVideoStatus.IN_PROGRESS;
+    private Video mapToEntity(VideoRequest request) {
+        Video video = new Video();
+        video.setStartTime(request.getStartTime());
+        video.setEndTime(request.getEndTime());
+        video.setIsUrl(false);
+        video.setPathType(videoProperties.getPathType());
+        VideoStatus videoStatus = VideoStatus.IN_PROGRESS;
         if (StringUtils.isNotEmpty(request.getStatus())) {
-            gifVideoStatus = GifVideoStatus.fromValue(request.getStatus());
+            videoStatus = VideoStatus.fromValue(request.getStatus());
         }
-        gifVideo.setStatus(gifVideoStatus.name());
-        return gifVideo;
+        video.setStatus(videoStatus.name());
+        return video;
     }
 
-    private GifVideo mapToEntity(GifUrlRequest request) {
-        GifVideo gifVideo = new GifVideo();
-        gifVideo.setStartTime(request.getStartTime());
-        gifVideo.setEndTime(request.getEndTime());
-        gifVideo.setIsUrl(true);
-        gifVideo.setPath(request.getUrl());
-        gifVideo.setPathType(videoProperties.getPathType());
-        GifVideoStatus gifVideoStatus = GifVideoStatus.IN_PROGRESS;
+    private Video mapToEntity(VideoUrlRequest request) {
+        Video video = new Video();
+        video.setStartTime(request.getStartTime());
+        video.setEndTime(request.getEndTime());
+        video.setIsUrl(true);
+        video.setPath(request.getUrl());
+        video.setPathType(videoProperties.getPathType());
+        VideoStatus videoStatus = VideoStatus.IN_PROGRESS;
         if (StringUtils.isNotEmpty(request.getStatus())) {
-            gifVideoStatus = GifVideoStatus.fromValue(request.getStatus());
+            videoStatus = VideoStatus.fromValue(request.getStatus());
         }
-        gifVideo.setStatus(gifVideoStatus.name());
-        return gifVideo;
+        video.setStatus(videoStatus.name());
+        return video;
     }
 
     private String saveFile(MultipartFile file) throws IOException {
@@ -112,12 +115,12 @@ public class GifVideoService {
     public void checkInProgress() {
         LocalDateTime date = LocalDateTime.now().plusMinutes(videoProperties.getInProgressTimeout());
 
-        List<GifVideo> gifVideos = gifVideoRepository.getByCreatedAtBeforeAndStatus(date, GifVideoStatus.IN_PROGRESS.name());
+        List<Video> videos = videoRepository.getByCreatedAtBeforeAndStatus(date, VideoStatus.IN_PROGRESS.name());
 
-        gifVideos.forEach(gifVideo -> {
+        videos.forEach(video -> {
             try {
-                kafkaProducer.sendMessage(kafkaProperties.getGifTopic(), gifVideo);
-                log.info("GifVideo[TransactionId: {}] has been reprocessed.", gifVideo.getTransactionId());
+                kafkaProducer.sendMessage(kafkaProperties.getVideoTopic(), video);
+                log.info("GifVideo[TransactionId: {}] has been reprocessed.", video.getTransactionId());
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }

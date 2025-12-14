@@ -35,9 +35,9 @@ func main() {
 func KafkaListen() {
 	limit := make(chan int, 10)
 	log.Println("Kafka listening...")
-	consumeTopic := os.Getenv("KAFKA_GIF_TOPIC")
+	consumeTopic := os.Getenv("KAFKA_VIDEO_TOPIC")
 	kafkaService.Consume(consumeTopic, func(message []byte) {
-		var gif model.GifVideo
+		var gif model.Video
 		err := json.Unmarshal(message, &gif)
 		if err != nil {
 			log.Println("Error unmarshalling gif json", err)
@@ -53,18 +53,18 @@ func KafkaListen() {
 	close(limit)
 }
 
-func GifKafkaProcess(gif *model.GifVideo) {
+func GifKafkaProcess(gif *model.Video) {
 	now := time.Now()
 	defer func() {
 		finish := time.Now()
 		log.Println("Gif process took", finish.Sub(now).Seconds(), "seconds Gif", GiffLogData(gif, nil))
 	}()
-	produceTopic := os.Getenv("KAFKA_GIF_FINISH_TOPIC")
-	produceErrorTopic := os.Getenv("KAFKA_GIF_ERROR_TOPIC")
+	produceTopic := os.Getenv("KAFKA_VIDEO_FINISH_TOPIC")
+	produceErrorTopic := os.Getenv("KAFKA_VIDEO_ERROR_TOPIC")
 	err := GiffProcess(gif)
 	if err != nil {
 		log.Println("Error processing gif", GiffLogData(gif, err))
-		err = kafkaService.ProduceAny(produceErrorTopic, model.GifVideoErrorLog{Message: err.Error(), TransactionID: gif.TransactionID})
+		err = kafkaService.ProduceAny(produceErrorTopic, model.VideoErrorLog{Message: err.Error(), TransactionID: gif.TransactionID})
 		if err != nil {
 			log.Println("Error producing gif", GiffLogData(gif, err))
 		}
@@ -78,7 +78,7 @@ func GifKafkaProcess(gif *model.GifVideo) {
 	log.Println("Processed gif", GiffLogData(gif, err))
 }
 
-func GiffProcess(gif *model.GifVideo) error {
+func GiffProcess(gif *model.Video) error {
 	log.Println("Gif processing...", GiffLogData(gif, nil))
 
 	daysStr := os.Getenv("VIDEO_GIF_TIMEOUT_DAYS")
@@ -98,7 +98,7 @@ func GiffProcess(gif *model.GifVideo) error {
 	return nil
 }
 
-func GiffLogData(gif *model.GifVideo, err error) string {
+func GiffLogData(gif *model.Video, err error) string {
 	errMsg := ""
 	if err != nil {
 		errMsg = err.Error()

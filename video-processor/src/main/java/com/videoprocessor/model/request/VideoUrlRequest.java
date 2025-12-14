@@ -11,7 +11,7 @@ import org.hibernate.validator.constraints.URL;
         greaterThanField = "endTime",
         message = "The start time cannot occur after the end time."
 )
-public class GifUrlRequest {
+public class VideoUrlRequest {
     @URL
     private String url;
     @NotNull
