@@ -39,7 +39,7 @@ services:
     platform: linux/amd64
     build:
       context: .
-      dockerfile: ./video-handler/Dockerfile
+      dockerfile: ./video-handler/dev/Dockerfile
     depends_on:
       video-kafka:
         condition: service_healthy
@@ -50,6 +50,8 @@ services:
     env_file:
       - .env
       - ./video-handler/.env
+    volumes:
+      - ./video-handler:/app
     deploy:
       resources:
         limits:
