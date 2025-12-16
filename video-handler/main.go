@@ -46,40 +46,40 @@ func KafkaListen() {
 
 		limit <- 1
 		go func() {
-			GifKafkaProcess(&gif)
+			KafkaProcess(&gif)
 			<-limit
 		}()
 	})
 	close(limit)
 }
 
-func GifKafkaProcess(gif *model.Video) {
+func KafkaProcess(gif *model.Video) {
 	now := time.Now()
 	defer func() {
 		finish := time.Now()
-		log.Println("Gif process took", finish.Sub(now).Seconds(), "seconds Gif", GiffLogData(gif, nil))
+		log.Println("Process process took", finish.Sub(now).Seconds(), "seconds Gif", VideoLogData(gif, nil))
 	}()
 	produceTopic := os.Getenv("KAFKA_VIDEO_FINISH_TOPIC")
 	produceErrorTopic := os.Getenv("KAFKA_VIDEO_ERROR_TOPIC")
-	err := GiffProcess(gif)
+	err := VideoProcess(gif)
 	if err != nil {
-		log.Println("Error processing gif", GiffLogData(gif, err))
+		log.Println("Error processing video", VideoLogData(gif, err))
 		err = kafkaService.ProduceAny(produceErrorTopic, model.VideoErrorLog{Message: err.Error(), TransactionID: gif.TransactionID})
 		if err != nil {
-			log.Println("Error producing gif", GiffLogData(gif, err))
+			log.Println("Error producing video", VideoLogData(gif, err))
 		}
 		return
 	}
 	err = kafkaService.ProduceAny(produceTopic, gif)
 	if err != nil {
-		log.Println("Error producing message", GiffLogData(gif, err))
+		log.Println("Error producing message", VideoLogData(gif, err))
 		return
 	}
-	log.Println("Processed gif", GiffLogData(gif, err))
+	log.Println("Processed video", VideoLogData(gif, err))
 }
 
-func GiffProcess(gif *model.Video) error {
-	log.Println("Gif processing...", GiffLogData(gif, nil))
+func VideoProcess(video *model.Video) error {
+	log.Println("Video processing...", VideoLogData(video, nil))
 
 	daysStr := os.Getenv("VIDEO_GIF_TIMEOUT_DAYS")
 	var expires *time.Time = nil
@@ -89,8 +89,8 @@ func GiffProcess(gif *model.Video) error {
 		expires = &dur
 	}
 
-	gs := service.NewGifService(gif, expires)
-	err = gs.GiffProcess()
+	vs := service.BuildVideoProcess(video, expires)
+	err = vs.Process()
 
 	if err != nil {
 		return err
@@ -98,18 +98,18 @@ func GiffProcess(gif *model.Video) error {
 	return nil
 }
 
-func GiffLogData(gif *model.Video, err error) string {
+func VideoLogData(video *model.Video, err error) string {
 	errMsg := ""
 	if err != nil {
 		errMsg = err.Error()
 	}
 
-	data := util.GifLog{
+	data := util.VideoLog{
 		Err: errMsg,
 	}
 
-	data.Gif.ID = gif.ID
-	data.Gif.TransactionID = gif.TransactionID
+	data.Video.ID = video.ID
+	data.Video.TransactionID = video.TransactionID
 	jsonData, _ := json.Marshal(data)
 	return string(jsonData)
 }

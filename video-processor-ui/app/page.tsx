@@ -3,9 +3,9 @@
 import { useState, ChangeEvent, FormEvent } from 'react';
 import {requiredSpan, alert, ifElse, timeToSeconds} from "@/src/helper/helper";
 import {VideoGifRequest} from "@/src/model/request/request";
-import {uploadGifVideo} from "@/src/service/api";
+import {uploadVideo} from "@/src/service/api";
 import { useRouter } from 'next/navigation';
-import {ApiConfig} from "@/src/config/config";
+import {ApiConfig, VideoProcessType} from "@/src/config/config";
 import TimePicker from "react-time-picker";
 import 'react-time-picker/dist/TimePicker.css';
 import 'react-clock/dist/Clock.css';
@@ -15,13 +15,15 @@ const initialVideoData: VideoGifRequest = {
     url: '',
     startTime: 0,
     endTime: 0,
+    processType: 'GIF'
 };
 
 export default function Home() {
     const [data, setData] = useState<VideoGifRequest>(initialVideoData);
-    const [startTime, setStarTime] = useState<string|null>("00:00:00");
+    const [startTime, setStartTime] = useState<string|null>("00:00:00");
     const [endTime, setEndTime] = useState<string|null>("00:00:00");
     const [videoNotFound, setVideoNotFound] = useState(false);
+    const [invalidProcessType, setInvalidProcessType] = useState(false);
     const [invalidStartTime, setInvalidStartTime] = useState(false);
     const [invalidEndTime, setInvalidEndTime] = useState(false);
     const [alertMessage, setAlertMessage] = useState("");
@@ -53,11 +55,18 @@ export default function Home() {
                 [id]: Number(value),
             }));
         }
-    };
+    }
+    const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
+        const {id, value } = e.target;
+        setData(prev => ({
+            ...prev,
+            [id]: value,
+        }));
+    }
 
     const handleTime = (value: string | null, id: string) => {
         if (id == "startTime") {
-            setStarTime(value);
+            setStartTime(value);
         }
 
         if (id == "endTime") {
@@ -74,12 +83,20 @@ export default function Home() {
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        let formBody = null;
         if (!data.file && !data.url) {
             setVideoNotFound(true);
+            setFieldErrMessageMessage("Video file or url not found.");
             return;
         }
 
         setVideoNotFound(false);
+        if (!data.processType) {
+            setInvalidProcessType(true);
+            setFieldErrMessageMessage("Invalid process type.");
+        }
+        setInvalidProcessType(false);
+
         if (data.startTime == null || data.startTime < 0) {
             setInvalidStartTime(true);
             setFieldErrMessageMessage("Invalid start time.");
@@ -93,29 +110,31 @@ export default function Home() {
             return;
         }
 
-        if (data.endTime - data.startTime > ApiConfig.START_END_TIME_RANGE) {
+        if (data.processType == VideoProcessType.GIF && data.endTime - data.startTime > ApiConfig.GIF_START_END_TIME_RANGE) {
+            setInvalidEndTime(true);
+            setFieldErrMessageMessage("Invalid time range.");
+            return;
+        }
+
+        if (data.processType == VideoProcessType.CUT && data.endTime - data.startTime > ApiConfig.CUT_START_END_TIME_RANGE) {
             setInvalidEndTime(true);
             setFieldErrMessageMessage("Invalid time range.");
             return;
         }
         setInvalidEndTime(false);
 
-        const formData: FormData = new FormData(e.currentTarget);
         const isUrl = !!data.url;
+        formBody = JSON.stringify(data);
 
-        if (isUrl) {
-            uploadGifVideo(JSON.stringify(data), isUrl).then((res) => {
-                console.log("Routing....");
-                router.push(`/gif?transactionId=${res.transactionId}`);
-            }).catch((err) => {
-                console.log('Error:', err);
-            })
-            return;
+        if (!isUrl) {
+            formBody = new FormData(e.currentTarget);
+            formBody.set("startTime", String(data.startTime));
+            formBody.set("endTime", String(data.endTime));
         }
 
-        uploadGifVideo(formData, isUrl).then((res) => {
+        uploadVideo(formBody, isUrl).then((res) => {
             console.log("Routing....");
-            router.push(`/gif?transactionId=${res.transactionId}`);
+            router.push(`/video?transactionId=${res.transactionId}`);
         }).catch((err) => {
             setAlertMessage(err.message);
             console.log('Error:', err);
@@ -125,9 +144,17 @@ export default function Home() {
     return (
         <div className="container mt-5">
             {ifElse(alertMessage, alert("danger", alertMessage), "")}
-            <h1 className="mb-4 text-center">🎥 GIF Converter Tool</h1>
+            <h1 className="mb-4 text-center">🎥 Video Processor Tool</h1>
             <form onSubmit={handleSubmit} className="p-4 border rounded shadow-sm">
 
+                <div className="mb-4">
+                    <label htmlFor="videoLink" className="form-label fw-bold">Process Type</label>
+                    <select className={`form-control ${invalidProcessType ? 'border border-danger' : ''}`} name="processType" id="processType" onChange={handleSelectChange}>
+                        <option value="GIF">Video To GIF</option>
+                        <option value="CUT">Cut The Video</option>
+                    </select>
+                    { requiredSpan(invalidProcessType, fieldErrMessage) }
+                </div>
                 {/* --- 1. Video Upload Area (File) --- */}
                 <div className="mb-4">
                     <input

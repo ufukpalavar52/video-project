@@ -1,4 +1,4 @@
-class ApiError<T> extends Error {
+export class ApiError<T> extends Error {
     body: T
 
     constructor(message: string, body: T) {

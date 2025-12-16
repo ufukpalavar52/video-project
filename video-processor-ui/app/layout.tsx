@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GIF Converter Tool",
-  description: "GIF Converter Tool",
+  title: "Video Processor Tool",
+  description: "Video Processor Tool",
 };
 
 export default function RootLayout({

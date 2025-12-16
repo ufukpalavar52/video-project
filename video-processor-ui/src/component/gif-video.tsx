@@ -2,7 +2,7 @@
 
 import {GifVideo} from "@/src/model/response/response";
 import {ReactNode} from "react";
-import {ApiConfig, GifVideoStatus} from "@/src/config/config";
+import {ApiConfig, VideoProcessType, VideoStatus} from "@/src/config/config";
 import Head from "next/head";
 import {allType} from "@/src/helper/types";
 import {AnimatedDot} from "@/src/component/common";
@@ -12,17 +12,17 @@ interface GifVideoProps {
     loading: boolean;
 }
 
-interface GifPageProps {
+interface VideoPageProps {
     children: ReactNode
 }
 
-function videoDownload(downloadLink: string) {
+function videoDownload(downloadLink: string, processType:string) {
     return (
         <>
             <div className="mb-4 text-success display-4">
                 ✓
             </div>
-            <h1 className="mb-3 fs-3 fw-bold">Gif Ready for Download</h1>
+            <h1 className="mb-3 fs-3 fw-bold">{processType} Ready for Download</h1>
             <p className="text-muted mb-4">
                 Your video has been successfully processed and is ready to be accessed.
             </p>
@@ -31,7 +31,7 @@ function videoDownload(downloadLink: string) {
                 download
                 className="btn btn-primary w-100 fw-bold"
             >
-                Download GIF
+                Download {processType}
             </a>
         </>
     )
@@ -78,7 +78,7 @@ function videoError(message: allType) {
     )
 }
 
-function GifMainPage(props: GifPageProps) {
+function VideoMainPage(props: VideoPageProps) {
     return (
         <>
             <Head>
@@ -97,28 +97,29 @@ function GifMainPage(props: GifPageProps) {
     )
 }
 
-export function GifPageComponent(props: GifVideoProps) {
+export function VideoPageComponent(props: GifVideoProps) {
     if (props.loading && !props.gifVideo) {
         return (
-            <GifMainPage>
+            <VideoMainPage>
                 {videoError("Video not found.")}
-            </GifMainPage>
+            </VideoMainPage>
         )
     }
 
-    if (props.gifVideo?.status === GifVideoStatus.ERROR) {
+    if (props.gifVideo?.status === VideoStatus.ERROR) {
         return (
-            <GifMainPage>
+            <VideoMainPage>
                 {videoError("An error occurred while converting the video to a GIF.")}
-            </GifMainPage>
+            </VideoMainPage>
         )
     }
 
-    const isVideoProcessed = props.gifVideo?.status === GifVideoStatus.SUCCESS
-    const downloadLink = ApiConfig.GIF_DOWNLOAD_URL.replace("{transactionId}", String(props.gifVideo?.transactionId))
+    const processType = props.gifVideo?.processType === VideoProcessType.GIF ? "GIF" : "Video";
+    const isVideoProcessed = props.gifVideo?.status === VideoStatus.SUCCESS
+    const downloadLink = ApiConfig.DOWNLOAD_URL.replace("{transactionId}", String(props.gifVideo?.transactionId))
     return (
-        <GifMainPage>
-            { isVideoProcessed ? videoDownload(downloadLink) : videoProgress() }
-        </GifMainPage>
+        <VideoMainPage>
+            { isVideoProcessed ? videoDownload(downloadLink, processType) : videoProgress() }
+        </VideoMainPage>
     );
 }

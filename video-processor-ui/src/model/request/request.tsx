@@ -3,4 +3,5 @@ export interface VideoGifRequest {
     url: string;
     startTime: number;
     endTime: number;
+    processType: string;
 }

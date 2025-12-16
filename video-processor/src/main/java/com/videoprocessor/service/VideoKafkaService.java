@@ -19,7 +19,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class GifKafkaService {
+public class VideoKafkaService {
     private final VideoRepository videoRepository;
     private final VideoErrorLogRepository errorLogRepository;
     private final ObjectMapper mapper;
@@ -40,19 +40,19 @@ public class GifKafkaService {
 
     @KafkaListener(topics = "${spring.kafka.video-error-topic}", groupId = "${spring.kafka.consumer.group-id}")
     public void consumeGifError(String message) throws JsonProcessingException {
-        VideoError gifError = mapper.readValue(message, VideoError.class);
-        Video video = videoRepository.getByTransactionId(gifError.getTransactionId()).orElse(null);
+        VideoError videoError = mapper.readValue(message, VideoError.class);
+        Video video = videoRepository.getByTransactionId(videoError.getTransactionId()).orElse(null);
         if (video == null) {
-            log.warn("Gif process not found {}", gifError);
+            log.warn("Gif process not found {}", videoError);
             return;
         }
         video.setStatus(VideoStatus.ERROR.name());
         videoRepository.save(video);
 
-        String truncatedMessage = StrUtils.truncateString(gifError.getMessage(), 5000);
+        String truncatedMessage = StrUtils.truncateString(videoError.getMessage(), 5000);
 
         VideoErrorLog errorLog = new VideoErrorLog();
-        errorLog.setTransactionId(gifError.getTransactionId());
+        errorLog.setTransactionId(videoError.getTransactionId());
         errorLog.setMessage(truncatedMessage);
         errorLogRepository.save(errorLog);
 

@@ -29,19 +29,19 @@ func (u *UrlService) PutFile(fullPath string, data []byte, expires ...*time.Time
 func (u *UrlService) DownloadVideo(fullUrl string) ([]byte, error) {
 	filename := fmt.Sprintf("%s.mp4", util.UUID())
 	args := []string{
-		"download",
-		"-q",
-		"medium",
+		"--js-runtimes", "deno",
+		"-f",
+		"best[height<=480]",
 		"-o",
 		filename,
 		fullUrl,
 	}
 
 	log.Printf("Downloading video[url:%s]...\n", fullUrl)
-	cmd := exec.Command("youtubedr", args...)
+	cmd := exec.Command("yt-dlp", args...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Println("Command: youtubedr " + strings.Join(args, " "))
+		log.Println("Command: yt-dlp " + strings.Join(args, " "))
 		return nil, util.NewError("Download Error: %v, Output: %s", err, out)
 	}
 

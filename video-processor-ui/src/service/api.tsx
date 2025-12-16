@@ -3,13 +3,13 @@ import {ApiData, doRequest} from "@/src/service/fetcher";
 import {GifVideo} from "@/src/model/response/response";
 import {ApiConfig} from "@/src/config/config";
 
-export async function uploadGifVideo(request: BodyInit, isUrl:boolean): Promise<GifVideo> {
-    let endpoint = ApiConfig.GIF_VIDEO_UPLOAD_ENDPOINT;
+export async function uploadVideo(request: BodyInit, isUrl:boolean): Promise<GifVideo> {
+    let endpoint = ApiConfig.VIDEO_UPLOAD_ENDPOINT;
     const headers: Record<string, string> = {
         "Accept": "application/json",
     }
     if (isUrl) {
-        endpoint = ApiConfig.GIF_VIDEO_URL_ENDPOINT
+        endpoint = ApiConfig.VIDEO_URL_ENDPOINT
         headers["Content-Type"] = "application/json"
     }
 
@@ -23,10 +23,8 @@ export async function uploadGifVideo(request: BodyInit, isUrl:boolean): Promise<
     return doRequest(apiData)
 }
 
-let configCache: { API_URL: string } | null = null;
-
-export async function getGifVideo(transactionId: string): Promise<GifVideo> {
-    const endpoint = ApiConfig.GIF_VIDEO_BASE_ENDPOINT
+export async function getVideo(transactionId: string): Promise<GifVideo> {
+    const endpoint = ApiConfig.VIDEO_BASE_ENDPOINT
     const apiData: ApiData = {
         method: "GET",
         endpoint: endpoint,

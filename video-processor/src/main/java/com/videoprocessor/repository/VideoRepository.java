@@ -12,6 +12,8 @@ import java.util.Optional;
 public interface VideoRepository extends JpaRepository<Video, Long> {
     Optional<Video> getByTransactionId(String transactionId);
 
+    Optional<Video> getByTransactionIdAndProcessType(String transactionId, String processType);
+
     List<Video> getByCreatedAtBeforeAndStatus(LocalDateTime createdAtBefore, String status);
 }
 

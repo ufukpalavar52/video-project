@@ -3,10 +3,10 @@
 import {useEffect, useState} from "react";
 import {GifVideo} from "@/src/model/response/response";
 import {useSearchParams} from "next/navigation";
-import {getGifVideo} from "@/src/service/api";
-import {GifPageComponent} from "@/src/component/gif-video";
+import {getVideo} from "@/src/service/api";
+import {VideoPageComponent} from "@/src/component/gif-video";
 
-export default function GifContent() {
+export default function VideoContent() {
     const [gifData, setGifData] = useState<GifVideo>()
     const [loading, setLoading] = useState<boolean>(false);
     const searchParams = useSearchParams();
@@ -19,7 +19,7 @@ export default function GifContent() {
 
         const fetchData = async () => {
             try {
-                const response = await getGifVideo(transactionId);
+                const response = await getVideo(transactionId);
                 setGifData(response);
                 setLoading(true);
                 return response;
@@ -52,6 +52,6 @@ export default function GifContent() {
 
 
     return (
-        <GifPageComponent gifVideo={gifData} loading={loading}/>
+        <VideoPageComponent gifVideo={gifData} loading={loading}/>
     );
 }

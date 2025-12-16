@@ -10,6 +10,7 @@ export interface GifVideo {
     isUrl: boolean;
     path: string;
     pathType: string;
+    processType: string;
     status: string;
     startTime: number;
     endTime: number;

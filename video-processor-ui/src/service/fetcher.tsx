@@ -1,8 +1,8 @@
 
-import {ApiConfig} from "@/src/config/config";
 import {buildQueryType} from "@/src/helper/types";
 import {httpBuildQuery} from "@/src/helper/helper";
 import {ErrorResponse} from "@/src/model/response/response";
+import {ApiError} from "@/src/handler/api.error";
 
 export interface ApiData {
     method: string;
@@ -12,7 +12,7 @@ export interface ApiData {
     data?: BodyInit;
 }
 
-let configCache: { API_URL: string } | null = null;
+let configCache: { BASE_URL: string } | null = null;
 
 export async function apiFetcher<T>(data: ApiData): Promise<T> {
     const config = await ensureConfigLoaded();
@@ -20,7 +20,7 @@ export async function apiFetcher<T>(data: ApiData): Promise<T> {
         throw new Error("Missing config");
     }
 
-    let url = `${config?.API_URL}${data.endpoint}`;
+    let url = `${config?.BASE_URL}${data.endpoint}`;
     let headers: Record<string, string> = {
         'Content-Type': 'application/json',
     };
@@ -79,7 +79,7 @@ export function doRequest<T>(apiData: ApiData): Promise<T> {
     }
 }
 
-async function ensureConfigLoaded(): Promise<{ API_URL: string } | null> {
+async function ensureConfigLoaded(): Promise<{ BASE_URL: string } | null> {
     if (configCache) {
         return configCache;
     }

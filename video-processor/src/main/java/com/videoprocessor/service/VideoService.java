@@ -2,12 +2,10 @@ package com.videoprocessor.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.videoprocessor.constant.ErrorCode;
-import com.videoprocessor.constant.VideoProcessType;
 import com.videoprocessor.constant.VideoStatus;
 import com.videoprocessor.exception.CommonException;
 import com.videoprocessor.model.entity.Video;
 import com.videoprocessor.model.request.VideoRequest;
-import com.videoprocessor.model.request.VideoUrlRequest;
 import com.videoprocessor.property.VideoProperties;
 import com.videoprocessor.property.KafkaProperties;
 import com.videoprocessor.repository.VideoRepository;
@@ -28,7 +26,7 @@ import java.util.Objects;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class GifVideoService {
+public class VideoService {
 
     private final VideoRepository videoRepository;
     private final VideoProperties videoProperties;
@@ -40,18 +38,16 @@ public class GifVideoService {
         String path = saveFile(file);
         Video video = mapToEntity(request);
         video.setPath(path);
-        video.setTransactionId(StrUtils.UUID());
-        video.setProcessType(VideoProcessType.GIF.name());
+        video.setIsUrl(false);
         Video saveGif = videoRepository.save(video);
         kafkaProducer.sendMessage(kafkaProperties.getVideoTopic(), video);
         return saveGif;
     }
 
-    public Video save(VideoUrlRequest request) throws IOException {
+    public Video save(VideoRequest request) throws IOException {
         Video video = mapToEntity(request);
-        video.setTransactionId(StrUtils.UUID());
-        video.setProcessType(VideoProcessType.GIF.name());
         Video saveGif = videoRepository.save(video);
+        video.setIsUrl(true);
         kafkaProducer.sendMessage(kafkaProperties.getVideoTopic(), video);
         return saveGif;
     }
@@ -69,22 +65,14 @@ public class GifVideoService {
         Video video = new Video();
         video.setStartTime(request.getStartTime());
         video.setEndTime(request.getEndTime());
-        video.setIsUrl(false);
-        video.setPathType(videoProperties.getPathType());
-        VideoStatus videoStatus = VideoStatus.IN_PROGRESS;
-        if (StringUtils.isNotEmpty(request.getStatus())) {
-            videoStatus = VideoStatus.fromValue(request.getStatus());
-        }
-        video.setStatus(videoStatus.name());
-        return video;
-    }
+        video.setTransactionId(StrUtils.UUID());
 
-    private Video mapToEntity(VideoUrlRequest request) {
-        Video video = new Video();
-        video.setStartTime(request.getStartTime());
-        video.setEndTime(request.getEndTime());
-        video.setIsUrl(true);
-        video.setPath(request.getUrl());
+        if (StringUtils.isNotEmpty(request.getUrl())) {
+            video.setPath(request.getUrl());
+            video.setIsUrl(true);
+        }
+
+        video.setProcessType(request.getProcessType().name());
         video.setPathType(videoProperties.getPathType());
         VideoStatus videoStatus = VideoStatus.IN_PROGRESS;
         if (StringUtils.isNotEmpty(request.getStatus())) {

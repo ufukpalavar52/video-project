@@ -1,11 +1,11 @@
 import {Suspense} from "react";
-import GifContent from "@/app/gif/gif-content";
+import VideoContent from "@/app/video/video-content";
 
 export default function GifPage() {
     return (
         <main>
             <Suspense>
-                <GifContent />
+                <VideoContent />
             </Suspense>
         </main>
     );
