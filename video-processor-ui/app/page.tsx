@@ -191,7 +191,7 @@ export default function Home() {
                 {/* --- 3. Time Adjustment Fields --- */}
                 <div className="row g-3">
                     <div className="col-md-6">
-                        <label htmlFor="startTime" className="form-label fw-bold" >3. Start Time (Seconds)</label>
+                        <label htmlFor="startTime" className="form-label fw-bold" >3. Start Time</label>
                         <TimePicker
                             format="HH:mm:ss"
                             disableClock={true}
@@ -209,7 +209,7 @@ export default function Home() {
                     </div>
 
                     <div className="col-md-6">
-                        <label htmlFor="endTime" className="form-label fw-bold">4. End Time (Seconds)</label>
+                        <label htmlFor="endTime" className="form-label fw-bold">4. End Time</label>
                         <TimePicker
                             format="HH:mm:ss"
                             disableClock={true}
