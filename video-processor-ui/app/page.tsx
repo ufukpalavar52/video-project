@@ -148,7 +148,7 @@ export default function Home() {
             <form onSubmit={handleSubmit} className="p-4 border rounded shadow-sm">
 
                 <div className="mb-4">
-                    <label htmlFor="videoLink" className="form-label fw-bold">Process Type</label>
+                    <label htmlFor="processType" className="form-label fw-bold">Process Type</label>
                     <select className={`form-control ${invalidProcessType ? 'border border-danger' : ''}`} name="processType" id="processType" onChange={handleSelectChange}>
                         <option value="GIF">Video To GIF</option>
                         <option value="CUT">Cut The Video</option>
