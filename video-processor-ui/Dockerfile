@@ -1,7 +1,7 @@
 FROM node:21-alpine AS deps
 WORKDIR /app
 
-COPY video-processor-ui/package.json video-processor-ui/package-lock.json ./
+COPY video-processor-ui/package.json /app/package.json
 
 RUN npm install
 
