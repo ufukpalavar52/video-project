@@ -59,6 +59,10 @@ func (c *CutVideoService) Process() error {
 	fullPath := os.Getenv("VIDEO_GIF_OUTPUT_PATH") + "/" + videoName
 	err = c.storage.PutFile(fullPath, body, c.expires)
 
+	if err != nil {
+		return err
+	}
+
 	c.video.OutputPath = fullPath
 	return nil
 }
