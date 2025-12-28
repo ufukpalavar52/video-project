@@ -43,19 +43,19 @@ func (c *CutVideoService) Process() error {
 	defer util.DeleteFile(filePath)
 	ffs := NewFfmpegService(c.video.TransactionID)
 
-	cropPath, err := ffs.CutVideo(filePath, c.video.StartTime, c.video.EndTime)
+	cutPath, err := ffs.CutVideo(filePath, c.video.StartTime, c.video.EndTime)
 
 	if err != nil {
 		return err
 	}
-	defer util.DeleteFile(cropPath)
+	defer util.DeleteFile(cutPath)
 
-	body, err := os.ReadFile(filePath)
+	body, err := os.ReadFile(cutPath)
 	if err != nil {
-		return util.NewError("Error reading video file. Path:%s Err:%v", cropPath, err)
+		return util.NewError("Error reading video file. Path:%s Err:%v", cutPath, err)
 	}
 
-	_, videoName, _ := util.ParsePath(cropPath)
+	_, videoName, _ := util.ParsePath(cutPath)
 	fullPath := os.Getenv("VIDEO_GIF_OUTPUT_PATH") + "/" + videoName
 	err = c.storage.PutFile(fullPath, body, c.expires)
 
