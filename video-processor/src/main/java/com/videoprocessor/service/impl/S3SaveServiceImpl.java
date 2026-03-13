@@ -1,7 +1,8 @@
-package com.videoprocessor.service;
+package com.videoprocessor.service.impl;
 
 import com.videoprocessor.constant.ErrorCode;
 import com.videoprocessor.exception.CommonException;
+import com.videoprocessor.service.intf.StorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,9 +15,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Slf4j
-@Service
+@Service("s3")
 @RequiredArgsConstructor
-public class S3SaveService implements StorageService {
+public class S3SaveServiceImpl implements StorageService {
     private final S3Client s3Client;
 
 
@@ -75,7 +76,7 @@ public class S3SaveService implements StorageService {
                 .build());
     }
 
-    public void createBucketIfNotExists(String bucketName) {
+    private void createBucketIfNotExists(String bucketName) {
         boolean exists = s3Client.listBuckets()
                 .buckets()
                 .stream()

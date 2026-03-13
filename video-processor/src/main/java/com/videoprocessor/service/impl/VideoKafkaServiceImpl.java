@@ -1,4 +1,4 @@
-package com.videoprocessor.service;
+package com.videoprocessor.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,7 +19,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class VideoKafkaService {
+public class VideoKafkaServiceImpl {
     private final VideoRepository videoRepository;
     private final VideoErrorLogRepository errorLogRepository;
     private final ObjectMapper mapper;
