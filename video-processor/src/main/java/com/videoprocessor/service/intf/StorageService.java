@@ -1,4 +1,4 @@
-package com.videoprocessor.service;
+package com.videoprocessor.service.intf;
 
 import java.io.IOException;
 

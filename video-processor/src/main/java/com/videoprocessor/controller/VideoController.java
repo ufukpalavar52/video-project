@@ -3,7 +3,7 @@ package com.videoprocessor.controller;
 import com.videoprocessor.constant.VideoProcessType;
 import com.videoprocessor.model.entity.Video;
 import com.videoprocessor.model.request.VideoRequest;
-import com.videoprocessor.service.VideoService;
+import com.videoprocessor.service.intf.VideoService;
 import com.videoprocessor.util.ValidationUtils;
 import com.videoprocessor.validator.video.VideoFile;
 import jakarta.validation.Valid;

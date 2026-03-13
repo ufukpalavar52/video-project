@@ -1,26 +1,25 @@
-package com.videoprocessor.service;
+package com.videoprocessor.service.impl;
 
 import com.videoprocessor.constant.PathType;
 import com.videoprocessor.property.VideoProperties;
+import com.videoprocessor.service.intf.StorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class VideoSaveStorageFactory {
     private final VideoProperties fileProperties;
-    private final S3SaveService s3SaveService;
-    private final FileSaveService fileSaveService;
+    private final Map<String, StorageService> storageServiceMap;
 
     public StorageService makeStorageService(String pathType) {
-        switch (PathType.fromValue(pathType)) {
-            case S3 -> {
-                return s3SaveService;
-            }
-            default -> {
-                return  fileSaveService;
-            }
+        StorageService storageService = storageServiceMap.get(pathType);
+        if (storageService == null) {
+            return storageServiceMap.get(PathType.FILE.name().toLowerCase());
         }
+        return storageService;
     }
 
     public StorageService makeStorageService() {

@@ -1,7 +1,9 @@
-package com.videoprocessor.service;
+package com.videoprocessor.service.impl;
 
 import com.videoprocessor.constant.ErrorCode;
+import com.videoprocessor.constant.PathType;
 import com.videoprocessor.exception.CommonException;
+import com.videoprocessor.service.intf.StorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -10,9 +12,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-@Service
+@Service("file")
 @RequiredArgsConstructor
-public class FileSaveService implements StorageService {
+public class FileSaveServiceImpl implements StorageService {
 
     @Override
     public Boolean saveFile(String fullPath, byte[] data) throws IOException {
